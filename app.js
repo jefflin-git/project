@@ -3,54 +3,33 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+// require packages used in the project
+const exphbs = require('express-handlebars')
+const movieList = require('./movies.json')
+//setting template engine
+app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
+app.set('view engine', 'handlebars')
+
 // routes setting
 app.get('/', (req, res) => {
-  res.send(`<h1>Create your own server with Node.js</h1>
-    <h3>Popular movies in 2018</h3>
-    <ul>
-      <li>
-        <img
-          src="https://movie-list.alphacamp.io/posters/c9XxwwhPHdaImA2f1WEfEsbhaFB.jpg"
-          alt="Jurassic World: Fallen Kingdom"
-          width="50px"
-        />
-        Jurassic World: Fallen Kingdom
-      </li>
-      <li>
-        <img
-          src="https://movie-list.alphacamp.io/posters/rv1AWImgx386ULjcf62VYaW8zSt.jpg"
-          alt="Ant-Man and the Wasp"
-          width="50px"
-        />
-        Ant-Man and the Wasp
-      </li>
-      <li>
-        <img
-          src="https://movie-list.alphacamp.io/posters/rzRwTcFvttcN1ZpX2xv4j3tSdJu.jpg"
-          alt="Thor: Ragnarok"
-          width="50px"
-        />
-        Thor: Ragnarok
-      </li>
-      <li>
-        <img
-          src="https://movie-list.alphacamp.io/posters/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg"
-          alt="Avengers: Infinity War"
-          width="50px"
-        />
-        Avengers: Infinity War
-      </li>
-      <li>
-        <img
-          src="https://movie-list.alphacamp.io/posters/80PWnSTkygi3QWWmJ3hrAwqvLnO.jpg"
-          alt="Mission: Impossible - Fallout"
-          width="50px"
-        />
-        Mission: Impossible - Fallout
-      </li>
-    </ul>`)
+  res.render('index', { movies: movieList.results })
 })
 
+app.get('/movies/:movie_id', (req, res) => {
+  const selectMovie = movieList.results.find(movie => movie.id.toString() === req.params.movie_id)
+  res.render('show', { movie: selectMovie })
+  // console.log(req.query)
+})
+
+app.get('/search', (req, res) => {
+
+  const keyword = req.query.keyword
+  const movies = movieList.results.filter(movie => movie.title.toLowerCase().includes(keyword.toLowerCase()))
+  res.render('index', { movies: movies, keyword: keyword })
+
+})
+//setting static file
+app.use(express.static('public'))
 // start and listen on the Express server
 app.listen(port, () => {
   console.log(`Express is listening on localhost:${port} ${Date()}`)
